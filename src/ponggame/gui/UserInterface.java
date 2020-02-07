@@ -1,25 +1,33 @@
 package ponggame.gui;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Graphics;
 
 import ponggame.gamelogic.PongGame;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
-public class UserInterface implements Runnable{
+public class UserInterface extends JPanel implements Runnable {
 	
 	private JFrame frame;
 	private PongGame pg;
 	
 	public UserInterface(PongGame pg){
+		super.setBackground(Color.BLACK);
 		this.pg = pg;
 	}
 	
 	public void run() {
 		frame = new JFrame("Pong Game");
-		frame.setPreferredSize(new Dimension(pg.getBoardWidth(), pg.getBoardHeight()));
+		
+		int calibration = 40; // To allow size of board to align with size of window
+		
+		frame.setPreferredSize(new Dimension(pg.getBoardWidth() + calibration, pg.getBoardHeight() + calibration));
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		createComponents(frame.getContentPane());
 		frame.pack();
@@ -27,9 +35,17 @@ public class UserInterface implements Runnable{
 	}
 	
 	public void createComponents(Container container){
-		DrawingBoard db = new DrawingBoard(pg);
-		container.add(db);
-		frame.addKeyListener(new KeyboardListener(pg.getPaddleLeft(), pg.getPaddleRight(), frame));
+		container.add(new UserInterface(pg));
+		frame.addKeyListener(new KeyboardListener(pg, frame));
+		frame.setFocusable(true);
+	}
+	
+	@Override
+	protected void paintComponent(Graphics graphics){
+		super.paintComponent(graphics);
+		pg.getBall().draw(graphics);
+		pg.getPaddleLeft().draw(graphics);
+		pg.getPaddleRight().draw(graphics);
 	}
 	
 	public JFrame getFrame(){

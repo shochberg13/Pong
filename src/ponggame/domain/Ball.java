@@ -3,6 +3,12 @@ package ponggame.domain;
 import java.awt.Color;
 import java.awt.Graphics;
 
+/**
+ * 
+ * @author Seth
+ *
+ */
+
 public class Ball {
 	private int x;
 	private int y;
@@ -10,11 +16,8 @@ public class Ball {
 	private final int ballDiameter;
 	
 	
-	public Ball(int x, int y, Direction direction) {
-		this.x = x;
-		this.y = y;
+	public Ball() {
 		this.ballDiameter = 20;
-		this.direction = direction;
 	}
 
 	public void move(int dx, int dy){
@@ -55,9 +58,4 @@ public class Ball {
 	public void setDirection(Direction direction){
 		this.direction = direction;
 	}
-	
-	public String toString(){
-		return "{" + this.x + ", " + this.y + ")";
-	}
-	
 }

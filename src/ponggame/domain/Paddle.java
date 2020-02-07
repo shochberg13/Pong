@@ -13,18 +13,13 @@ public class Paddle {
 	private int paddleHeight;
 	
 	public Paddle(){
-		this(0,0);
-	}
-	
-	public Paddle(int x, int y) {
-		this.x = x;
-		this.y = y;
 		this.paddleWidth = 30;
 		this.paddleHeight = 150;
 	}
-
+	
+	// Only Y because paddle will never move in X-direction
 	public void move(int dy){
-		this.y += dy;
+		this.y += dy; 
 	}
 	
 	public void draw(Graphics graphics){
@@ -54,10 +49,6 @@ public class Paddle {
 	
 	public void setY(int y){
 		this.y = y;
-	}
-	
-	public String toString(){
-		return "{" + this.x + ", " + this.y + ")";
 	}
 	
 }

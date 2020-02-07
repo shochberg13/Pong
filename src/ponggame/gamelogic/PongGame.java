@@ -1,15 +1,13 @@
 package ponggame.gamelogic;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javax.swing.Timer;
+import java.util.Random;
 
 import ponggame.gui.UserInterface;
 import ponggame.domain.Ball;
 import ponggame.domain.Direction;
 import ponggame.domain.Paddle;
 
-public class PongGame extends Timer implements ActionListener {
+public class PongGame  {
 	private int boardHeight;
 	private int boardWidth;
 	private int spacing;
@@ -18,59 +16,41 @@ public class PongGame extends Timer implements ActionListener {
 	private Ball ball;
 	private boolean gameContinues;
 	private UserInterface ui;
+	private int playerLeftScore;
+	private int playerRightScore;
+	private int pointsToWinTheGame;
 	
-	public PongGame(int boardHeight, int boardWidth){
-		super(1000, null);
+	public PongGame(int boardHeight, int boardWidth, int pointsToWinTheGame){
 		this.boardHeight = boardHeight;
 		this.boardWidth = boardWidth;
-		this.spacing = 15; // Space between paddle and edge of board
+		
+		this.spacing = 20; // Space between paddle and edge of board
 		
 		this.paddleLeft = new Paddle();
-		this.paddleLeft.setX(spacing);
-		this.paddleLeft.setY((boardHeight / 2) - (this.paddleLeft.getPaddleHeight() / 2));
-		
 		this.paddleRight = new Paddle();
-		this.paddleRight.setX(boardWidth - (20 + spacing + this.paddleRight.getPaddleWidth()) );
-		this.paddleRight.setY((boardHeight/2) - (this.paddleRight.getPaddleHeight() / 2));
-
-		this.ball = new Ball(boardWidth / 2, boardHeight / 2, Direction.SOUTHWEST);
-
-		addActionListener(this);
-		setInitialDelay(2000);
-		this.gameContinues = true;
-	}
-	
-	@Override
-	public void actionPerformed(ActionEvent ae) {
-//		while(gameContinues){
-//
-//			ballMoves();
-//			this.ui.getFrame().repaint();
-//			
-//			if(ballHitsPaddle()){
-//				changeXDirection();
-//			}
-//			
-//			if (ballHitsNorthOrSouthWall()){
-//				changeYDirection();
-//			}
-//			
-//			if(ballGoesOutOfBounds()){
-//				gameContinues = false;
-//			}
-//			
-//			delay(50);
-//		}
+		this.ball = new Ball();
+		setInitialPositions();
 		
-		// Code for point scoring goes here!
+		this.playerLeftScore = 0;
+		this.playerRightScore = 0;
+		this.pointsToWinTheGame = pointsToWinTheGame;
 	}
 	
 	public void start(){
+		// Initialize Board and wait
+		setInitialPositions();
+		this.ui.getFrame().repaint();
+		delayMilliseconds(2000);
+		
+		// A counter to help speed up the ball as the game progresses
+		int delayCounter = 10; 
+		
+		// Each loop the ball moves one increment (~1 pixel)
 		while(gameContinues){
-
+			
 			ballMoves();
 			this.ui.getFrame().repaint();
-			
+
 			if(ballHitsPaddle()){
 				changeXDirection();
 			}
@@ -80,13 +60,16 @@ public class PongGame extends Timer implements ActionListener {
 			}
 			
 			if(ballGoesOutOfBounds()){
+				if (this.ball.getX() <= 0) playerRightScore ++;
+				if (this.ball.getX() >= this.boardWidth) playerLeftScore ++;
+				
 				gameContinues = false;
 			}
 			
-			delay(50);
+			// Allows the ball to speed up logarithmically
+			delayCounter += 3;
+			delayMilliseconds(200 / (int) Math.log(delayCounter));
 		}
-		
-		// Code for point scoring goes here!
 	}
 	
 	public void ballMoves(){
@@ -101,14 +84,13 @@ public class PongGame extends Timer implements ActionListener {
 		}else if (this.ball.getDirection() == Direction.SOUTHWEST){
 			this.ball.move(-dx, dy);
 		}
-		// REPAINT
 	}
 	
 	public boolean ballHitsPaddle(){
 		
 		// If it hits the right paddle
 		if (ball.getDirection() == Direction.NORTHEAST || ball.getDirection() == Direction.SOUTHEAST){
-			if (ball.getX() + ball.getBallDiameter() >= (boardWidth - (paddleRight.getPaddleWidth() + spacing))){
+			if (ball.getX() + ball.getBallDiameter() == (boardWidth - (paddleRight.getPaddleWidth() + spacing))){
 				if (ball.getY() + ball.getBallDiameter() > paddleRight.getY() && 
 						ball.getY() < paddleRight.getY() + paddleRight.getPaddleHeight()){
 					return true;
@@ -117,7 +99,7 @@ public class PongGame extends Timer implements ActionListener {
 		}
 		// If it hits the left paddle
 		if(ball.getDirection() == Direction.NORTHWEST || ball.getDirection() == Direction.SOUTHWEST){
-			if (ball.getX()  <= this.spacing + paddleLeft.getPaddleWidth()){
+			if (ball.getX()  == this.spacing + paddleLeft.getPaddleWidth()){
 				if (ball.getY() + ball.getBallDiameter() > paddleLeft.getY() && 
 						ball.getY() < paddleLeft.getY() + paddleLeft.getPaddleHeight()){
 					return true;
@@ -129,7 +111,7 @@ public class PongGame extends Timer implements ActionListener {
 	}
 	
 	public boolean ballHitsNorthOrSouthWall(){
-		if (this.ball.getY() >= this.boardHeight || this.ball.getY() <= 0){
+		if (this.ball.getY() + this.ball.getBallDiameter() >= this.boardHeight || this.ball.getY() <= 0){
 			return true;
 		}
 		return false;
@@ -155,11 +137,6 @@ public class PongGame extends Timer implements ActionListener {
 		}else if (this.ball.getDirection() == Direction.SOUTHWEST){
 			this.ball.setDirection(Direction.SOUTHEAST);
 			
-		}else if (this.ball.getDirection() == Direction.FLATWEST){
-			this.ball.setDirection(Direction.FLATEAST);
-		
-		}else if (this.ball.getDirection() == Direction.FLATEAST){
-			this.ball.setDirection(Direction.FLATWEST);
 		}
 	}
 	
@@ -178,12 +155,48 @@ public class PongGame extends Timer implements ActionListener {
 		}
 	}
 	
-	public void delay(int x){
+	public void delayMilliseconds(int x){
 		try {
 			Thread.sleep(x);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void setInitialPositions(){
+		this.paddleLeft.setX(spacing);
+		this.paddleLeft.setY((boardHeight / 2) - (this.paddleLeft.getPaddleHeight() / 2));
+		
+		this.paddleRight.setX(boardWidth - (spacing + this.paddleRight.getPaddleWidth()));
+		this.paddleRight.setY((boardHeight/2) - (this.paddleRight.getPaddleHeight() / 2));
+		
+		this.ball.setX(boardWidth / 2);
+		this.ball.setY(boardHeight/2);
+		this.ball.setDirection(randomInitialDirection());
+		
+		this.gameContinues = true;
+	}
+	
+	public Direction randomInitialDirection(){
+		Random random = new Random();
+		int dir = random.nextInt(4);
+		switch (dir) {
+		case 0:
+			return Direction.NORTHEAST; 
+		case 1:
+			return Direction.NORTHWEST; 
+		case 2:
+			return Direction.SOUTHEAST;
+		case 3:
+			return Direction.SOUTHWEST;
+		default:
+			System.out.println("Error with random direction");
+			return Direction.NORTHEAST;
+		}
+	}
+	
+	public boolean gameIsOver(){
+		return this.playerLeftScore == pointsToWinTheGame || this.playerRightScore == pointsToWinTheGame;
 	}
 	
 	public Paddle getPaddleLeft(){
@@ -204,6 +217,14 @@ public class PongGame extends Timer implements ActionListener {
 	
 	public int getBoardWidth(){
 		return this.boardWidth;
+	}
+	
+	public int getPlayerLeftScore(){
+		return this.playerLeftScore;
+	}
+	
+	public int getPlayerRightScore(){
+		return this.playerRightScore;
 	}
 	
 	public void setPaddleLeft(Paddle paddleLeft){

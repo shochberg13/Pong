@@ -1,6 +1,5 @@
 package ponggame.gui;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -12,6 +11,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
+@SuppressWarnings("serial")
 public class UserInterface extends JPanel implements Runnable {
 	
 	private JFrame frame;

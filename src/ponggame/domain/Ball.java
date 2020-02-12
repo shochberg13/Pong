@@ -3,11 +3,6 @@ package ponggame.domain;
 import java.awt.Color;
 import java.awt.Graphics;
 
-/**
- * 
- * @author Seth
- *
- */
 
 public class Ball {
 	private int x;

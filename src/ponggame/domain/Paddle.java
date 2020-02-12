@@ -3,7 +3,6 @@ package ponggame.domain;
 import java.awt.Color;
 import java.awt.Graphics;
 
-
 public class Paddle {
 	// Refers to coordinate of top left corner of the paddle
 	private int x; 

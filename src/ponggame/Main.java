@@ -18,10 +18,8 @@ public class Main {
 			System.out.println("Waiting for game to start");
 		}
 		
-		
 		while(!pg.gameIsOver()){
 			pg.start();
 		}
-		
 	}
 }
